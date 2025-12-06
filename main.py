@@ -20,7 +20,7 @@ target = "exam_score"
 X = df.drop(target, axis=1)
 y = df[target]
 
-# Train - Test Split
+
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
 
@@ -51,7 +51,7 @@ preprocessor = ColumnTransformer(transformers=[
 
 pipeline = Pipeline(steps=[
     ('preprocessor', preprocessor),
-    ('regressor', GradientBoostingRegressor(random_state=42))
+    ('regressor', GradientBoostingRegressor(random_state=15, n_estimators=200, max_depth=2, loss='squared_error', min_samples_split=5, min_samples_leaf=2, learning_rate=0.1))
 ])
 
 
