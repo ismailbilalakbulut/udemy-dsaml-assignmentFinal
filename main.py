@@ -11,6 +11,7 @@ from sklearn.metrics import mean_squared_error, r2_score
 
 df = pd.read_csv("student_habits_performance.csv")
 
+df = df.drop('student_id', axis=1)
 
 df['parental_education_level'] = df['parental_education_level'].fillna('High School')
 
