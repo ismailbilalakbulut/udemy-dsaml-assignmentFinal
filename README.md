@@ -106,7 +106,7 @@ task8/
 
 ## 🎓 Veri Seti
 
-Model, [student_habits_performance.csv]((https://www.kaggle.com/datasets/jayaantanaath/student-habits-vs-academic-performance)) dosyasından öğrenci alışkanlıkları ve sınav puanları verilerine dayanarak eğitilmiştir.
+Model, [student_habits_performance.csv](https://www.kaggle.com/datasets/jayaantanaath/student-habits-vs-academic-performance) dosyasından öğrenci alışkanlıkları ve sınav puanları verilerine dayanarak eğitilmiştir.
 
 ## 📄 Lisans
 
