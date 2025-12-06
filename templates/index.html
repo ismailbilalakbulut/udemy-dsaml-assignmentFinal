@@ -1,0 +1,566 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Öğrenci Başarı Tahmin Sistemi</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0f0f1e 0%, #1a1a3f 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            padding: 30px 15px;
+            margin: 0;
+            overflow-x: hidden;
+        }
+
+        .container {
+            background: linear-gradient(135deg, #1a1a3f 0%, #2d2d5f 100%);
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.7), 0 0 40px rgba(100, 200, 255, 0.1);
+            padding: 50px;
+            width: 100%;
+            max-width: 1200px;
+            border: 1px solid rgba(100, 200, 255, 0.15);
+            display: flex;
+            flex-direction: column;
+            gap: 18px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 15px;
+        }
+
+        .header h1 {
+            color: #64c8ff;
+            font-size: 28px;
+            margin-bottom: 8px;
+            text-shadow: 0 0 10px rgba(100, 200, 255, 0.3);
+        }
+
+        .header p {
+            color: #b0b0c0;
+            font-size: 14px;
+        }
+
+        .info-box {
+            background: linear-gradient(135deg, #2a3a5f 0%, #1f2a4f 100%);
+            padding: 16px 18px;
+            border-radius: 10px;
+            border: 2px solid #64c8ff;
+            box-shadow: 0 0 15px rgba(100, 200, 255, 0.15);
+            margin-bottom: 12px;
+        }
+
+        .info-box p {
+            color: #b0d0e0;
+            font-size: 13px;
+            line-height: 1.6;
+        }
+
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 6px;
+            color: #d0d0e0;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        input[type="number"],
+        select {
+            width: 100%;
+            padding: 11px 13px;
+            border: 2px solid #3a3a5f;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            font-family: inherit;
+            background-color: #2a2a4f;
+            color: #e0e0f0;
+        }
+
+        input[type="number"]:focus,
+        select:focus {
+            outline: none;
+            border-color: #64c8ff;
+            box-shadow: 0 0 0 3px rgba(100, 200, 255, 0.15), inset 0 0 0 1px rgba(100, 200, 255, 0.1);
+            background-color: #323252;
+        }
+
+        input[type="number"]::placeholder {
+            color: #7a7a8a;
+        }
+
+        select option {
+            background-color: #2a2a4f;
+            color: #e0e0f0;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 18px;
+        }
+
+        .submit-btn {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, #64c8ff 0%, #00bfff 100%);
+            color: #0f0f1e;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 8px;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 30px rgba(100, 200, 255, 0.4);
+        }
+
+        .submit-btn:active {
+            transform: translateY(0px);
+        }
+
+        .submit-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .result {
+            margin-top: 12px;
+            padding: 22px;
+            background: linear-gradient(135deg, #2a3a5f 0%, #1f2a4f 100%);
+            border-radius: 10px;
+            display: none;
+            border: 2px solid #64c8ff;
+            box-shadow: 0 0 15px rgba(100, 200, 255, 0.2);
+        }
+
+        .result.show {
+            display: block;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .result-label {
+            color: #b0b0c0;
+            font-size: 14px;
+            margin-bottom: 10px;
+        }
+
+        .result-value {
+            color: #64c8ff;
+            font-size: 36px;
+            font-weight: 700;
+            text-shadow: 0 0 10px rgba(100, 200, 255, 0.3);
+        }
+
+        .result-description {
+            color: #9090a0;
+            font-size: 13px;
+            margin-top: 12px;
+            line-height: 1.6;
+        }
+
+        .error-message {
+            padding: 14px 17px;
+            background: linear-gradient(135deg, #5f2a2a 0%, #4f2a2a 100%);
+            color: #ff8080;
+            border-radius: 8px;
+            margin-top: 10px;
+            display: none;
+            border: 2px solid #ff6060;
+            box-shadow: 0 0 15px rgba(255, 80, 80, 0.2);
+            font-size: 13px;
+        }
+
+        .error-message.show {
+            display: block;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            margin-top: 10px;
+        }
+
+        .loading.show {
+            display: block;
+        }
+
+        .spinner {
+            border: 3px solid #3a3a5f;
+            border-top: 3px solid #64c8ff;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 10px;
+            box-shadow: 0 0 10px rgba(100, 200, 255, 0.3);
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .loading-text {
+            color: #b0b0c0;
+            font-size: 14px;
+        }
+
+        .time-warning {
+            padding: 14px 17px;
+            background: linear-gradient(135deg, #5f4a2a 0%, #4f3a2a 100%);
+            color: #ffb366;
+            border-radius: 8px;
+            margin-top: 10px;
+            display: none;
+            border: 2px solid #ff9933;
+            box-shadow: 0 0 15px rgba(255, 153, 51, 0.2);
+            font-size: 13px;
+        }
+
+        .time-warning.show {
+            display: block;
+        }
+
+        .time-display {
+            padding: 12px 15px;
+            background: linear-gradient(135deg, #2a3a5f 0%, #1f2a4f 100%);
+            border-radius: 8px;
+            margin-top: 10px;
+            border: 2px solid #64c8ff;
+            font-size: 13px;
+            color: #b0d0e0;
+            display: none;
+        }
+
+        .time-display.show {
+            display: block;
+        }
+
+        .time-display-value {
+            color: #64c8ff;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        @media (max-width: 900px) {
+            .form-row {
+                grid-template-columns: 1fr 1fr;
+                gap: 12px;
+            }
+        }
+
+        @media (max-width: 600px) {
+            .form-row {
+                grid-template-columns: 1fr;
+                gap: 10px;
+            }
+
+            .container {
+                padding: 25px;
+            }
+
+            .header h1 {
+                font-size: 22px;
+            }
+
+            .result-value {
+                font-size: 26px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📚 Öğrenci Başarı Tahmin</h1>
+            <p>Makine Öğrenmesi Modeli ile Sınav Puanı Tahmini</p>
+        </div>
+
+        <div class="info-box">
+            <p>💡 Öğrenci bilgilerini aşağıdaki forma girin ve tahmin edilen sınav puanını öğrenin.</p>
+        </div>
+
+        <form id="predictionForm">
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="age">Yaş</label>
+                    <input type="number" id="age" name="age" min="10" max="30" step="0.1" placeholder="20" required>
+                </div>
+                <div class="form-group">
+                    <label for="gender">Cinsiyet</label>
+                    <select id="gender" name="gender" required>
+                        <option value="">Seçin</option>
+                        <option value="Male">Erkek</option>
+                        <option value="Female">Kadın</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="study_hours_per_day">Çalışma Saati</label>
+                    <input type="number" id="study_hours_per_day" name="study_hours_per_day" min="0" max="24" step="0.5" placeholder="5" required>
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="social_media_hours">Sosyal Medya</label>
+                    <input type="number" id="social_media_hours" name="social_media_hours" min="0" max="24" step="0.5" placeholder="2" required>
+                </div>
+                <div class="form-group">
+                    <label for="netflix_hours">Netflix Saati</label>
+                    <input type="number" id="netflix_hours" name="netflix_hours" min="0" max="24" step="0.5" placeholder="1" required>
+                </div>
+                <div class="form-group">
+                    <label for="sleep_hours">Uyku Saati</label>
+                    <input type="number" id="sleep_hours" name="sleep_hours" min="0" max="24" step="0.5" placeholder="8" required>
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="attendance_percentage">Devam (%)</label>
+                    <input type="number" id="attendance_percentage" name="attendance_percentage" min="0" max="100" step="0.1" placeholder="85" required>
+                </div>
+                <div class="form-group">
+                    <label for="exercise_frequency">Egzersiz (Haftada)</label>
+                    <input type="number" id="exercise_frequency" name="exercise_frequency" min="0" max="7" step="0.5" placeholder="3" required>
+                </div>
+                <div class="form-group">
+                    <label for="mental_health_rating">Mental Sağlık (1-10)</label>
+                    <input type="number" id="mental_health_rating" name="mental_health_rating" min="1" max="10" step="0.1" placeholder="7" required>
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="part_time_job">Yarı Zamanlı İş</label>
+                    <select id="part_time_job" name="part_time_job" required>
+                        <option value="">Seçin</option>
+                        <option value="No">Hayır</option>
+                        <option value="Yes">Evet</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="diet_quality">Beslenme Kalitesi</label>
+                    <select id="diet_quality" name="diet_quality" required>
+                        <option value="">Seçin</option>
+                        <option value="Poor">Zayıf</option>
+                        <option value="Fair">Orta</option>
+                        <option value="Good">İyi</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="internet_quality">İnternet Kalitesi</label>
+                    <select id="internet_quality" name="internet_quality" required>
+                        <option value="">Seçin</option>
+                        <option value="Poor">Zayıf</option>
+                        <option value="Average">Orta</option>
+                        <option value="Good">İyi</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="parental_education_level">Ebeveyn Eğitim</label>
+                    <select id="parental_education_level" name="parental_education_level" required>
+                        <option value="">Seçin</option>
+                        <option value="High School">Lise</option>
+                        <option value="Bachelor">Lisans</option>
+                        <option value="Master">Yüksek Lisans</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="extracurricular_participation">Ders Dışı Aktiviteler</label>
+                    <select id="extracurricular_participation" name="extracurricular_participation" required>
+                        <option value="">Seçin</option>
+                        <option value="No">Hayır</option>
+                        <option value="Yes">Evet</option>
+                    </select>
+                </div>
+            </div>
+
+            <button type="submit" class="submit-btn">🔮 Tahmini Yap</button>
+        </form>
+
+        <div class="time-display" id="timeDisplay">
+            Günlük Saat Toplamı: <span class="time-display-value" id="totalHours">0</span> / 24 saat
+        </div>
+
+        <div class="time-warning" id="timeWarning">
+            ⚠️ Uyarı: Günlük toplam saat 24 saati aşıyor! Lütfen saatleri gözden geçirin.
+        </div>
+
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            <div class="loading-text">Tahmin yapılıyor...</div>
+        </div>
+
+        <div class="result" id="result">
+            <div class="result-label">Tahmin Edilen Sınav Puanı</div>
+            <div class="result-value" id="resultValue">0</div>
+            <div class="result-description">
+                Bu değer, makine öğrenmesi modeli tarafından verilen bilgilere göre hesaplanmıştır.
+            </div>
+        </div>
+
+        <div class="error-message" id="errorMessage"></div>
+    </div>
+
+    <script>
+        const form = document.getElementById('predictionForm');
+        const resultDiv = document.getElementById('result');
+        const resultValue = document.getElementById('resultValue');
+        const loadingDiv = document.getElementById('loading');
+        const errorDiv = document.getElementById('errorMessage');
+        const timeWarningDiv = document.getElementById('timeWarning');
+        const timeDisplayDiv = document.getElementById('timeDisplay');
+        const totalHoursSpan = document.getElementById('totalHours');
+        const submitBtn = document.querySelector('.submit-btn');
+
+        // Zaman alanları
+        const timeInputs = [
+            'study_hours_per_day',
+            'social_media_hours',
+            'netflix_hours',
+            'sleep_hours'
+        ];
+
+        // Zaman toplamını hesapla ve göster
+        function updateTimeDisplay() {
+            let total = 0;
+            timeInputs.forEach(inputId => {
+                const value = parseFloat(document.getElementById(inputId).value) || 0;
+                total += value;
+            });
+
+            totalHoursSpan.textContent = total.toFixed(1);
+            timeDisplayDiv.classList.add('show');
+
+            if (total > 24) {
+                timeWarningDiv.classList.add('show');
+                submitBtn.disabled = true;
+                totalHoursSpan.style.color = '#ff6060';
+            } else {
+                timeWarningDiv.classList.remove('show');
+                submitBtn.disabled = false;
+                totalHoursSpan.style.color = '#64c8ff';
+            }
+        }
+
+        // Zaman alanlarına event listener ekle
+        timeInputs.forEach(inputId => {
+            document.getElementById(inputId).addEventListener('input', updateTimeDisplay);
+        });
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            // Zaman kontrolü
+            let total = 0;
+            timeInputs.forEach(inputId => {
+                const value = parseFloat(document.getElementById(inputId).value) || 0;
+                total += value;
+            });
+
+            if (total > 24) {
+                errorDiv.textContent = `❌ Hata: Günlük toplam saat 24 saati aşıyor! (${total.toFixed(1)} / 24 saat)`;
+                errorDiv.classList.add('show');
+                return;
+            }
+
+            resultDiv.classList.remove('show');
+            errorDiv.classList.remove('show');
+            loadingDiv.classList.add('show');
+
+            try {
+                const formData = new FormData(form);
+                const data = {
+                    age: parseFloat(formData.get('age')),
+                    gender: formData.get('gender'),
+                    study_hours_per_day: parseFloat(formData.get('study_hours_per_day')),
+                    social_media_hours: parseFloat(formData.get('social_media_hours')),
+                    netflix_hours: parseFloat(formData.get('netflix_hours')),
+                    sleep_hours: parseFloat(formData.get('sleep_hours')),
+                    attendance_percentage: parseFloat(formData.get('attendance_percentage')),
+                    exercise_frequency: parseFloat(formData.get('exercise_frequency')),
+                    mental_health_rating: parseFloat(formData.get('mental_health_rating')),
+                    part_time_job: formData.get('part_time_job'),
+                    diet_quality: formData.get('diet_quality'),
+                    internet_quality: formData.get('internet_quality'),
+                    parental_education_level: formData.get('parental_education_level'),
+                    extracurricular_participation: formData.get('extracurricular_participation')
+                };
+
+                const response = await fetch('/predict', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(data)
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const result = await response.json();
+                let prediction = parseFloat(result.predicted_score).toFixed(2);
+                
+                // Eğer tahmin 100'ü geçerse 100 yap
+                if (prediction > 100) {
+                    prediction = 100;
+                }
+                
+                resultValue.textContent = prediction;
+                resultDiv.classList.add('show');
+
+            } catch (error) {
+                console.error('Error:', error);
+                errorDiv.textContent = `❌ Hata: ${error.message}`;
+                errorDiv.classList.add('show');
+            } finally {
+                loadingDiv.classList.remove('show');
+            }
+        });
+
+        // Sayfa yüklendiğinde form alanlarını temizle
+        window.addEventListener('load', () => {
+            form.reset();
+        });
+    </script>
+</body>
+</html>
